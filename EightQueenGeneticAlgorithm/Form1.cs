@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace EightQueenGeneticAlgorithm
 {
+    /// <summary>
+    /// erfan.roshan@gmail.com
+    /// </summary>
     public partial class Form1 : Form
     {
         public int n;
