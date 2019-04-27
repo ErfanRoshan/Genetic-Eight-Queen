@@ -18,11 +18,11 @@ namespace EightQueenGeneticAlgorithm
         public int n;
         public int p;
         public int mutationPossibillity;
-
+        public selectionType myselection;
         public int[,] currentGeneration;
         public int[,] newGeneration;
 
-        public Form1(int n,int p,int mutationPossibillity)
+        public Form1(int n,int p,int mutationPossibillity, selectionType myselection)
         {
             this.n = n;
             this.p = p;
@@ -31,12 +31,6 @@ namespace EightQueenGeneticAlgorithm
             currentGeneration = new int[p, n + 1];
             newGeneration = new int[p, n + 1];
             InitializeComponent();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            
-            
         }
 
         public void fitness(int[,] generation)
