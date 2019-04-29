@@ -27,7 +27,7 @@ namespace EightQueenGeneticAlgorithm
             this.n = n;
             this.p = p;
             this.mutationPossibillity = mutationPossibillity;
-
+            this.myselection = myselection;
             currentGeneration = new int[p, n + 1];
             newGeneration = new int[p, n + 1];
             InitializeComponent();
@@ -53,7 +53,7 @@ namespace EightQueenGeneticAlgorithm
                     }
                     
                 }
-                generation[i, n] = count;
+                generation[i, n] = 28-count;
             }
         }
 
@@ -64,7 +64,7 @@ namespace EightQueenGeneticAlgorithm
             {
                 for (int j = i+1; j < p; j++)
                 {
-                    if(generation[i,n]>generation[j,n])
+                    if(generation[i,n]<generation[j,n])
                         for (int l = 0; l <= n; l++)
                         {
                             temp = generation[i, l];
@@ -101,19 +101,33 @@ namespace EightQueenGeneticAlgorithm
         private void button2_Click(object sender, EventArgs e)
         {
             int nog = 0;
-            
+            fitness(currentGeneration);
+            if (myselection==selectionType.basic)
+            {                
+                sort(currentGeneration);
+            }
+            Print(currentGeneration, listBox1);
             do
             {
-                fitness(currentGeneration);
-                sort(currentGeneration);
-                if (nog == 0) Print(currentGeneration, listBox1);
+                if (nog>0)
+                {
+                    fitness(currentGeneration);
+                    if (myselection == selectionType.basic)
+                    {
+                        sort(currentGeneration);
+                    }
+                }
+                selection();
                 crossover();
                 mutation();
                 fitness(newGeneration);
-                sort(newGeneration);
+                if (myselection==selectionType.basic)
+                {
+                    sort(newGeneration);
+                }                
                 currentGeneration = newGeneration;
                 nog++;
-            } while (newGeneration[0,n]!=0);
+            } while (newGeneration[0,n]<28);
             Print(newGeneration, listBox2);
             //MessageBox.Show(nog+"", "Number of generation is:");   TODO
             label3.Text = "تعداد نسل ها  :  " + nog;
@@ -124,15 +138,68 @@ namespace EightQueenGeneticAlgorithm
                 gui.chromosome = listBox2.Items[0].ToString();
                 gui.ShowDialog();
         }
-        public void crossover()
+
+        private void selection()
         {
-            for (int i = 0; i < p / 2; i++)
+            if (myselection==selectionType.basic)
             {
-                for (int j = 0; j <= n; j++)
+                for (int i = 0; i < p / 2; i++)
                 {
-                    newGeneration[i, j] = currentGeneration[i, j];
+                    for (int j = 0; j <= n; j++)
+                    {
+                        newGeneration[i, j] = currentGeneration[i, j];
+                    }
                 }
             }
+            else if (myselection == selectionType.rouletteWheel)
+            {
+                Random r = new Random();
+                int count = 0;
+                int[] indexes = new int[p / 2];
+                int totalFitness = 0;
+                for (int i = 0; i < p; i++)
+                {
+                    totalFitness += currentGeneration[i, n];
+                }
+                do
+                {
+                    int rouletteRandom = r.Next(0, totalFitness);
+                    int sum = 0;
+                    for (int i = 0; i < p; i++)
+                    {
+                        if (rouletteRandom>sum && rouletteRandom<=sum+currentGeneration[i,n])
+                        {
+                            bool accept = true;
+                            for (int j = 0; j <= count; j++)
+                            {
+                                if (indexes[j]==i)
+                                {
+                                    accept = false;
+                                    break;
+                                }
+                            }
+                            if (accept)
+                            {
+                                indexes[count] = i;
+                                count++;
+                                break;
+                            }
+                        }
+                        sum += currentGeneration[i, n];
+                    }
+                } while (count<p/2);
+                for (int i = 0; i < p / 2; i++)
+                {
+                    for (int j = 0; j <= n; j++)
+                    {
+                        newGeneration[i, j] = currentGeneration[indexes[i], j];
+                    }
+                }
+            }
+        }
+
+        public void crossover()
+        {
 
             for (int i = 0; i < p / 2; i += 2)
             {
@@ -140,18 +207,21 @@ namespace EightQueenGeneticAlgorithm
                 {
                     if (j < n / 2)
                     {
-                        newGeneration[i + (p / 2), j] = currentGeneration[i, j];
-                        newGeneration[i + (p / 2) + 1, j] = currentGeneration[i + 1, j];
+                        newGeneration[i + (p / 2), j] = newGeneration[i, j];
+                        newGeneration[i + (p / 2) + 1, j] = newGeneration[i + 1, j];
                     }
                     else
                     {
-                        newGeneration[i + (p / 2), j] = currentGeneration[i + 1, j];
-                        newGeneration[i + (p / 2) + 1, j] = currentGeneration[i, j];
+                        newGeneration[i + (p / 2), j] = newGeneration[i + 1, j];
+                        newGeneration[i + (p / 2) + 1, j] = newGeneration[i, j];
                     }
                 }
             }
             fitness(newGeneration);
-            sort(newGeneration);
+            if (myselection==selectionType.basic)
+            {
+                sort(newGeneration);
+            }
         }
 
         public void mutation()
